@@ -1,0 +1,60 @@
+SOAPUI
+	- Il progetto si trova in: C:\Users\Duccio\SoapUI-Tutorials\Sample-SOAP-Project-soapui-project.xml, copiata in C:\JenkinsWorkspace
+	- TestSuite con test + complesso con accesso a DB é: DataTable_Testing
+	-DB Driver: il driver va copiato in C:\Program Files\SmartBear\SoapUI-5.2.1\bin\ext
+	- i comandi per la riga di comando da usare in testrunner li ho copiati lanciando da tasto dx su testsuite testrunner e eseguendo il test.
+	https://www.soapui.org/test-automation/running-functional-tests.html#_ga=1.6531121.2065381876.1472308325
+	Qui si vedono diversi errori che non si vedono da SOAPUI.
+	ATTENZIONE: durante la esecuzione spesso si incappa in errori che bloccano le finestre di SoapUI, a volte occorre addirittura chiudere l´applicazione.
+	Non ho capito la natura di questi errori, ma rilanciando, spesso non si verificano piú.
+	ATTENZIONE: ho notato che se non si imposta delle properties per il TC, si ha difficoltá a sfruttare la sintassi: ${#TestCase#username} nelle request,
+	se si imposta semplicemente:
+		context.username = usr
+	i valori non vengono sostituiti, occorre definire esplicitamente (dentro il TC):
+		curTC = testRunner.testCase
+		curTC.setPropertyValue("username",context.username)
+Testrunner
+Se eseguivo i test da testrunner, incontravo diversi errori, che invece non comparivano se eseguivo il run da soapui.	
+	- Plugin: il primo problema é descritto qui:
+	http://stackoverflow.com/questions/31409653/classnotfoundexception-after-updating-to-soapui-5-2-0/31470500#31470500
+	Come suggerito ho spostato il contenuto della cartella: c:\user\Duccio\.soapuios\plugins in C:\Program Files\SmartBear\SoapUI-5.2.1\bin\ext	
+	- Log4J: si vedeva nei log un errore relativo al log4J. Il problema era affrontato qui:
+	http://stackoverflow.com/questions/10682130/error-setfilenull-false-call-failed-when-using-log4j
+	Tra le varie soluzioni suggerite, ho modificato il file C:\Program Files\SmartBear\SoapUI-5.2.1\bin\soapui-log4j.xml
+	modificando <param name="File" value="${soapui.logroot}global-groovy.log"/> in
+	<param name="File" value="C:\SoapUI_Log\global-groovy.log"/>
+	ATTENZIONE: per modiifcare questo file in W7, occorre avviare notepad++ come amministratore, caricare il file e modificarlo,
+	altrimenti non si hanno i permessi per eseguire la modifica.
+	
+Jenkins
+	- La working directory si trova in: C:\JenkinsWorkspace
+	- Nella dir precedente ho copiato il progetto C:\Users\Duccio\SoapUI-Tutorials\Sample-SOAP-Project-soapui-project.xml
+	-File properties: dopo il caricamento di tutti i plugin, la compilazione di Jenkins si bloccava senza segnalare errori.
+	 Il problema é descritto qui:
+	 http://stackoverflow.com/questions/34359264/soapui-hanging-on-jenkins-after-couple-steps/34393685#comment66129151_34393685
+	 Ho risolto copiando il file C:\Users\Duccio\soapui-settings.xml direttamente in C:
+	-Porta in uso: risolto i problemi precedenti ho incontrato un errore dovuto alla impossibilitá di avviare il mock in quanto la porta risultava giá in uso.
+	Con netstat -a -o -n ho cercato il pid associato alla porta 8088 (quella  usata dal mock)
+	Con taskkill /F /PID 28344 ho chiuso il porcesso.
+	ATTENZIONE: non riuscivo a chiudere il processo in quanto risultava in uso, occorreva chiudere SOAPUI
+	-XUnit: una volta che il test si concludeva correttamente, avevo un errore nella generazione del report con XUnit (post build).
+	 Il problema é descritto qui:
+	 http://stackoverflow.com/questions/19138228/jenkins-the-result-file-for-the-metric-junit-is-not-valid-the-result-file-ha
+	 La soluzione consiste nel usare un report diverso da xunit, ho usato JUnit
+	
+ANT
+Per eseguire task pi´ü complessi con Jenkins, ad esempio scaricare il progetto SOAPUI da SVN prima di eseguirlo, credo sia meglio usare ANT.
+Ecco una guido:
+https://softwaretestersforum.blogspot.com/2013/03/generate-junit-style-html-reports-in.html
+Il link per il download:
+http://ant.apache.org/bindownload.cgi
+Configurare ANT in Jenkins:
+https://softwaretestersforum.blogspot.com/2013/04/integrate-soapui-with-jenkins.html
+Esempio di build.xml:
+https://community.smartbear.com/t5/SoapUI-NG/version-code-repository-and-build-process-integration/td-p/20327
+Alcune nozioni sul formato dei report si trovano qui:
+https://softwaretestersforum.blogspot.com/2013/03/generate-junit-style-html-reports-in.html
+https://itaffinity.wordpress.com/2012/06/05/generating-and-customizing-junit-and-code-coverage-reports-with-ant/
+Ma non mi sono state di grande aiuto, mi sembra che i report generai non siano visibili diretamente da Jenkins, ma li devo cercare nel folder di destinayione,forse ho sbagliato qualcosa. Forse é andata meglio con il punto seguente:
+Installato plugin:
+https://wiki.jenkins-ci.org/display/JENKINS/Test+Results+Analyzer+Plugin

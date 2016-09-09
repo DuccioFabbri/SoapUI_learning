@@ -1,0 +1,26 @@
+<project name="soapUI_tests" default="testreport" basedir=".">
+
+ <!-- define project location -->
+ <property name="project" value=".\Sample-SOAP-Project-soapui-project.xml" />
+ 
+ <!-- define targets -->
+ <target name="SOAPUI_TestSuite">
+  <exec executable="C:\Program Files\SmartBear\SoapUI-5.2.1\bin\testrunner.bat" failonerror="false" failifexecutionfails="false">
+   <arg line="-s${TestSuite} -rja -f.\reports ${project}"/>
+  </exec>
+ </target>
+ 
+  <target name="testreport" depends="SOAPUI_TestSuite">
+	  <junitreport todir=".\reports">
+		<fileset dir=".\reports">
+			<include name="TEST-*.xml"/>
+		</fileset>
+		<report todir=".\reports\HTML"
+			styledir="C:\ANT\apache-ant-1.9.7\etc"
+			format="frames">
+		</report>
+	  
+	  </junitreport>
+  </target>
+ 
+</project> 
